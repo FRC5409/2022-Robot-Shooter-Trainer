@@ -1,0 +1,6 @@
+rootProject.name = 'robot-trainer'
+
+file('projects').eachDir { it ->
+    include "${it.name}"
+    project(":${it.name}").projectDir = it
+}
