@@ -155,15 +155,22 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         SendableWriter writer = new SendableWriter(context, stream);
 
         StringSendable key = new StringSendable();
-        ValueSendable value = new ValueSendable();
 
         for (Entry<String, Object> entry : this) {
+            stream.writeByte(STREAM_COLLECTION_ITEM);
+
             key.setValue(entry.key());
-            value.setValue(entry.value());
+            writer.write(key);
+
+            Object value = entry.value();
+            if (value instanceof String) {
+                key.setValue((String) value);
+                writer.write(key);
+            } else {
+                writer.write(new ValueSendable(value));
+            }
 
             stream.writeByte(STREAM_COLLECTION_ITEM);
-            writer.write(key);
-            writer.write(value);
         }
         stream.writeByte(STREAM_COLLECTION_END);
     }

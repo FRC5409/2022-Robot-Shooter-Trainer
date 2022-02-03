@@ -13,6 +13,7 @@ public class SendableWriter {
     }
 
     public void write(NetworkSendable sendable) throws IOException {
+        _stream.writeLong(sendable.what());
         sendable.write(_context, _stream);
     }
 }
