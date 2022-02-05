@@ -13,42 +13,40 @@ public class NetworkClient {
         _context = context;
     }
 
-    public Future<NetworkTransactionResult> submitTransaction(NetworkTransaction transaction) {
-        FutureTask<NetworkTransactionResult> transactionTask = new FutureTask<>(
-            () -> {
-                if (_socket.isClosed())
-                    return new NetworkTransactionResult(NetworkStatus.STATUS_UNAVAILABLE, null);
+    public NetworkTransactionResult submitTransaction(NetworkTransaction transaction) {
+        if (_socket.isClosed())
+            return new NetworkTransactionResult(NetworkStatus.STATUS_UNAVAILABLE, null);
 
-                try {
-                    SendableWriter writer = new SendableWriter(_context, _socket.getOutputStream());
-                    
-                    writer.write(transaction.getPayload());
-                    writer.flush();
-                } catch (IOException e) {
-                    return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
-                }
+        try {
+            SendableWriter writer = new SendableWriter(_context, _socket.getOutputStream());
 
-                
-                try {
-                    DataInputStream stream = _socket.getInputStream();
-                    SendableReader reader = new SendableReader(_context, stream);
+            writer.write(transaction.getPayload());
+            writer.flush();
+        } catch (IOException e) {
+            return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
+        }
 
-                    int statusCode = stream.readInt();
-                    NetworkStatus status = NetworkStatus.fromId(statusCode);
+        try {
+            DataInputStream stream = _socket.getInputStream();
+            SendableReader reader = new SendableReader(_context, stream);
 
-                    if (status == null)
-                        throw new IOException("Unexpected status code 0x" + Integer.toHexString(statusCode));
+            int statusCode = stream.readInt();
+            NetworkStatus status = NetworkStatus.fromId(statusCode);
 
-                    NetworkSendable result = reader.read();
+            if (status == null)
+                throw new IOException("Unexpected status code 0x" + Integer.toHexString(statusCode));
 
-                    return new NetworkTransactionResult(status, result);
-                } catch (IOException e) {
-                    return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
-                }
-            }
-        );
+            NetworkSendable result = reader.read();
 
-        NetworkExecutors.getInstance().submit(transactionTask);
-        return transactionTask;
+            return new NetworkTransactionResult(status, result);
+        } catch (IOException e) {
+            return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
+        }
+    }
+
+    public Future<NetworkTransactionResult> submitTransactionAsync(NetworkTransaction transaction) {
+        FutureTask<NetworkTransactionResult> task = new FutureTask<>(() -> submitTransaction(transaction));
+        NetworkExecutors.getInstance().submit(task);
+        return task;
     }
 }

@@ -2,10 +2,10 @@ package org.frc.team5409.robot.training.protocol;
 
 import org.frc.team5409.robot.training.util.Factory;
 
-public class SendableRegistar {
+public class SendableRegistryBuilder {
     private final SendableRegistry _registry;
 
-    SendableRegistar(SendableRegistry registry) {
+    SendableRegistryBuilder(SendableRegistry registry) {
         _registry = registry;
     }
 

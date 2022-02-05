@@ -1,6 +1,7 @@
 package org.frc.team5409.robot.training.protocol;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,8 +16,8 @@ public class SendableRegistry {
     }
 
     public void registerSendable(Class<? extends NetworkSendable> type) {
-        SendableRegistar registar = new SendableRegistar(this);
-        configureSendableRegistration(type, registar);
+        SendableRegistryBuilder builder = new SendableRegistryBuilder(this);
+        configureSendableRegistration(type, builder);
     }
 
     @Nullable
@@ -51,12 +52,21 @@ public class SendableRegistry {
     }
 
 
-    private void configureSendableRegistration(Class<? extends NetworkSendable> type, SendableRegistar registar) {
+    private void configureSendableRegistration(Class<? extends NetworkSendable> type, SendableRegistryBuilder builder) {
         try {
-            Method registerCallback = type.getMethod("register", SendableRegistar.class);
-            registerCallback.invoke(registar);
+            Method registerCallback = type.getDeclaredMethod("register", SendableRegistryBuilder.class);
+
+            // Ensure callback is static, so we can use 'null' as obj
+            if ((registerCallback.getModifiers() & Modifier.STATIC) == 0) {
+                throw new NoSuchMethodException();
+            }
+
+            registerCallback.setAccessible(true);
+            registerCallback.invoke(null, builder);
+            registerCallback.setAccessible(false);
+
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("Class '" + type.getSimpleName()  + "' does not define \n static register(SendableRegistar registar)");
+            throw new IllegalArgumentException("Class '" + type.getSimpleName()  + "' does not define\nprivate static register(SendableRegistryBuilder registry)");
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to register Sendable of type '" + type.getSimpleName()  + "'", e);
         }

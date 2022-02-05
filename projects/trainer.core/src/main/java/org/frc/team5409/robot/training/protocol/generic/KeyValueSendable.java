@@ -15,7 +15,7 @@ import java.util.Map;
 // Inspired by android bundles
 public class KeyValueSendable implements NetworkSendable, EntryIterable<String, NetworkSendable> {
     @SuppressWarnings("unused")
-    private static void register(SendableRegistar registry) {
+    private static void register(SendableRegistryBuilder registry) {
         registry.registerFactory(KeyValueSendable.WHAT, KeyValueSendable.class, KeyValueSendable::new);
         registry.registerSendable(ValueSendable.class);
         registry.registerSendable(StringSendable.class);
@@ -68,10 +68,6 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         putValue(name, value);
     }
 
-    public void putString(@NotNull String name, @NotNull String value) {
-        putValue(name, value);
-    }
-
     public void putSendable(@NotNull String name, @NotNull NetworkSendable value) {
         _values.put(name, value);
     }
@@ -108,15 +104,9 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         return getValue(name, Short.class);
     }
 
-    public String getString(@NotNull String name) {
-        return getValue(name, String.class);
-    }
-
     public NetworkSendable getSendable(@NotNull String name) {
-        NetworkSendable sendable = _values.get(name);
-        if (sendable == null)
-            throw new IllegalArgumentException("Key '" + name + "' does not exist");
-        return sendable;
+        checkKey(name);
+        return _values.get(name);
     }
 
     public void clear() {
@@ -136,21 +126,27 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
     }
 
     protected <T> T getValue(String name, Class<T> clazz) throws IllegalArgumentException, ClassCastException {
-        Object rawValue = _values.get(name);
-        if (rawValue == null)
-            throw new IllegalArgumentException("Key '" + name + "' does not exist");
+        checkKey(name);
 
+        Object rawValue = _values.get(name);
         if (!ValueSendable.class.isAssignableFrom(rawValue.getClass()))
             throw new IllegalArgumentException("Cannot access key '" + name +
                 "' with ValueSendable semantics, class '" + rawValue.getClass().getSimpleName() + "' cannot be casted to 'ValueSendable'");
 
         ValueSendable valueSendable = (ValueSendable) rawValue;
 
-        if (!clazz.isAssignableFrom(valueSendable.getType()))
+        if (valueSendable.getType() == null)
+            throw new ClassCastException("ValueSendable with name '" + name + "' cannot be retrieved with null type ");
+        else if (!clazz.isAssignableFrom(valueSendable.getType()))
             throw new ClassCastException("ValueSendable with name '" + name + "' and type '" +
                 valueSendable.getType().getSimpleName() + "' cannot be casted to '" + clazz.getSimpleName() + "'");
 
         return clazz.cast(valueSendable.getValue());
+    }
+
+    private void checkKey(String name) {
+        if (!_values.containsKey(name))
+            throw new IllegalArgumentException("Key '" + name + "' does not exist");
     }
 
     @NotNull
@@ -196,5 +192,26 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         }
 
         stream.writeByte(STREAM_COLLECTION_END);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("KeyValueSendable[" + size() + "]{\n");
+
+        if (size() > 0) {
+            for (Entry<String, NetworkSendable> entry : this) {
+                builder.append("\t\"");
+                builder.append(entry.key());
+                builder.append("\" = ");
+                builder.append(entry.value());
+                builder.append(",\n");
+            }
+
+            builder.setCharAt(builder.length() - 2, ' ');
+        }
+
+        builder.append("}");
+
+        return builder.toString();
     }
 }

@@ -19,10 +19,12 @@ public class MainClient {
 
             NetworkClient client = new NetworkClient(socket, context);
 
-            Future<NetworkTransactionResult> futureResult = client.submitTransaction(
-                new NetworkTransaction(
-                    new StringSendable("Hello Wxrld!")
-                )
+            KeyValueSendable payload = new KeyValueSendable();
+                payload.putSendable("this.name", new StringSendable("Hello Wxrld!"));
+                payload.putInteger("this.age", 25);
+
+            Future<NetworkTransactionResult> futureResult = client.submitTransactionAsync(
+                new NetworkTransaction(payload)
             );
 
             System.out.println("Sent transaction");

@@ -6,6 +6,11 @@ public class NetworkRequestResult {
     private final NetworkStatus _status;
     private final NetworkSendable _payload;
 
+    public NetworkRequestResult(NetworkStatus status) {
+        _status = status;
+        _payload = null;
+    }
+
     public NetworkRequestResult(NetworkStatus status, @Nullable NetworkSendable payload) {
         _status = status;
         _payload = payload;

@@ -2,7 +2,7 @@ package org.frc.team5409.robot.training.protocol.generic;
 
 import org.frc.team5409.robot.training.protocol.NetworkSendable;
 import org.frc.team5409.robot.training.protocol.SendableContext;
-import org.frc.team5409.robot.training.protocol.SendableRegistar;
+import org.frc.team5409.robot.training.protocol.SendableRegistryBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,13 +13,14 @@ import java.nio.charset.StandardCharsets;
 
 public class StringSendable implements NetworkSendable {
     @SuppressWarnings("unused")
-    private static void register(SendableRegistar registry) {
+    private static void register(SendableRegistryBuilder registry) {
         registry.registerFactory(StringSendable.WHAT, StringSendable.class, StringSendable::new);
     }
 
     public static final long WHAT = 3273615128644272490L;
 
     private static final byte EOF = '\0';
+    private static final int BUFFER_SIZE = 1204;
 
     private String _value;
 
@@ -42,28 +43,27 @@ public class StringSendable implements NetworkSendable {
 
     @Override
     public void read(SendableContext context, DataInputStream stream) throws IOException {
-        StringBuilder builder = new StringBuilder();
+        byte[] buffer = new byte[BUFFER_SIZE];
 
-        byte[] buffer = new byte[1024];
+        int i = 0;
+        int k = 0;
 
-        int n = 0;
-        byte i;
-
-        while ((i = stream.readByte()) != EOF) {
-            if (n == 1024) {
-                builder.append(new String(buffer, 0, n+1, StandardCharsets.US_ASCII));
-                n = 0;
+        byte b;
+        while ((b = stream.readByte()) != EOF) {
+            if (i == BUFFER_SIZE) {
+                byte[] temp = new byte[buffer.length + BUFFER_SIZE];
+                System.arraycopy(buffer, 0, temp, 0, buffer.length);
+                buffer = temp;
+                i = 0;
             }
 
-            buffer[n] = i;
-            n++;
-        }
-        
-        if (n != 0) {
-            builder.append(new String(buffer, 0, n+1, StandardCharsets.US_ASCII));
+            buffer[k] = b;
+
+            i++;
+            k++;
         }
 
-        _value = builder.toString();
+        _value = new String(buffer, 0, k, StandardCharsets.US_ASCII);
     }
 
     @Override
@@ -82,5 +82,10 @@ public class StringSendable implements NetworkSendable {
     @Nullable
     public String getValue() {
         return _value;
+    }
+
+    @Override
+    public String toString() {
+        return "StringSendable(\"" + _value + "\")";
     }
 }
