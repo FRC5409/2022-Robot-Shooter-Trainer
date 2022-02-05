@@ -19,7 +19,7 @@ public class NetworkSocket {
         return create(new Socket(address, port));
     }
 
-    static NetworkSocket create(Socket socket) throws IOException {
+    public static NetworkSocket create(Socket socket) throws IOException {
         DataInputStream inputStream = new DataInputStream(
             new BufferedInputStream(socket.getInputStream())
         );

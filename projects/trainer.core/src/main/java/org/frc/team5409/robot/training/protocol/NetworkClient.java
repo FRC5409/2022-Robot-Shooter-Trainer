@@ -4,11 +4,11 @@ import java.io.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-public class NetworkBroker {
+public class NetworkClient {
     private final NetworkSocket _socket;
     private final SendableContext _context;
 
-    public NetworkBroker(NetworkSocket socket, SendableContext context) {
+    public NetworkClient(NetworkSocket socket, SendableContext context) {
         _socket = socket;
         _context = context;
     }
@@ -21,12 +21,27 @@ public class NetworkBroker {
 
                 try {
                     SendableWriter writer = new SendableWriter(_context, _socket.getOutputStream());
-                    SendableReader reader = new SendableReader(_context, _socket.getInputStream());
-
+                    
                     writer.write(transaction.getPayload());
+                    writer.flush();
+                } catch (IOException e) {
+                    return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
+                }
+
+                
+                try {
+                    DataInputStream stream = _socket.getInputStream();
+                    SendableReader reader = new SendableReader(_context, stream);
+
+                    int statusCode = stream.readInt();
+                    NetworkStatus status = NetworkStatus.fromId(statusCode);
+
+                    if (status == null)
+                        throw new IOException("Unexpected status code 0x" + Integer.toHexString(statusCode));
 
                     NetworkSendable result = reader.read();
-                    return new NetworkTransactionResult(NetworkStatus.STATUS_OK, result);
+
+                    return new NetworkTransactionResult(status, result);
                 } catch (IOException e) {
                     return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
                 }
@@ -36,5 +51,4 @@ public class NetworkBroker {
         NetworkExecutors.getInstance().submit(transactionTask);
         return transactionTask;
     }
-
 }
