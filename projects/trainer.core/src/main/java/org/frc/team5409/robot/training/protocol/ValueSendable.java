@@ -6,6 +6,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 
 public class ValueSendable implements NetworkSendable {
+    @SuppressWarnings("unused")
+    private static void register(SendableRegistar registry) {
+        registry.registerFactory(ValueSendable.WHAT, ValueSendable.class, ValueSendable::new);
+    }
+
     public static final long WHAT = -7383229974325473331L;
 
     public static final byte VALUE_TYPE_BYTE    = 0x0;

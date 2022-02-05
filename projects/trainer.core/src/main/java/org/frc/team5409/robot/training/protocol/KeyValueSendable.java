@@ -12,14 +12,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Inspired by android bundles
-public class KeyValueSendable implements NetworkSendable, EntryIterable<String, Object> {
+public class KeyValueSendable implements NetworkSendable, EntryIterable<String, NetworkSendable> {
+    @SuppressWarnings("unused")
+    private static void register(SendableRegistar registry) {
+        registry.registerFactory(KeyValueSendable.WHAT, KeyValueSendable.class, KeyValueSendable::new);
+        registry.registerSendable(ValueSendable.class);
+        registry.registerSendable(StringSendable.class);
+    }
+
     public static final long WHAT = 4019083808795941718L;
 
     private static final byte STREAM_COLLECTION_ITEM = 0x1;
     private static final byte STREAM_COLLECTION_END = 0x2;
 
-
-    protected Map<String, Object> _values;
+    protected Map<String, NetworkSendable> _values;
 
     public KeyValueSendable() {
         _values = new HashMap<>();
@@ -61,8 +67,12 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         putValue(name, value);
     }
 
-    public void putString(@NotNull String name, String value) {
+    public void putString(@NotNull String name, @NotNull String value) {
         putValue(name, value);
+    }
+
+    public void putSendable(@NotNull String name, @NotNull NetworkSendable value) {
+        _values.put(name, value);
     }
 
     public boolean getBoolean(@NotNull String name) {
@@ -101,8 +111,19 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         return getValue(name, String.class);
     }
 
+    public NetworkSendable getSendable(@NotNull String name) {
+        NetworkSendable sendable = _values.get(name);
+        if (sendable == null)
+            throw new IllegalArgumentException("Key '" + name + "' does not exist");
+        return sendable;
+    }
+
     public void clear() {
         _values.clear();
+    }
+
+    public int size() {
+        return _values.size();
     }
 
     public boolean exists(@NotNull String name) {
@@ -110,24 +131,30 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
     }
 
     protected void putValue(String name, Object value) {
-        _values.put(name, value);
+        _values.put(name, new ValueSendable(value));
     }
 
-    protected <T> T getValue(String name, Class<T> clazz) throws ClassCastException {
-        if (!_values.containsKey(name))
-            return null;
+    protected <T> T getValue(String name, Class<T> clazz) throws IllegalArgumentException, ClassCastException {
+        Object rawValue = _values.get(name);
+        if (rawValue == null)
+            throw new IllegalArgumentException("Key '" + name + "' does not exist");
 
-        Object value = _values.get(name);
-        if (!clazz.isAssignableFrom(value.getClass()))
-            throw new ClassCastException("Key with name '" + name + "' and class '" +
-                value.getClass().getSimpleName() + "' cannot be casted to '" + clazz.getSimpleName() + "'");
+        if (!ValueSendable.class.isAssignableFrom(rawValue.getClass()))
+            throw new IllegalArgumentException("Cannot access key '" + name +
+                "' with ValueSendable semantics, class '" + rawValue.getClass().getSimpleName() + "' cannot be casted to 'ValueSendable'");
 
-        return clazz.cast(value);
+        ValueSendable valueSendable = (ValueSendable) rawValue;
+
+        if (!clazz.isAssignableFrom(valueSendable.getType()))
+            throw new ClassCastException("ValueSendable with name '" + name + "' and type '" +
+                valueSendable.getType().getSimpleName() + "' cannot be casted to '" + clazz.getSimpleName() + "'");
+
+        return clazz.cast(valueSendable.getValue());
     }
 
     @NotNull
     @Override
-    public EntryIterator<String, Object> iterator() {
+    public EntryIterator<String, NetworkSendable> iterator() {
         return new EntryIterator<>(_values);
     }
 
@@ -139,14 +166,18 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
     @Override
     public void read(SendableContext context, DataInputStream stream) throws IOException {
         SendableReader reader = new SendableReader(context, stream);
+
         _values.clear();
 
         byte status;
         while ((status = stream.readByte()) != STREAM_COLLECTION_END) {
-            StringSendable key = (StringSendable) reader.read(StringSendable.WHAT);
-            ValueSendable value = (ValueSendable) reader.read(ValueSendable.WHAT);
+            if (status != STREAM_COLLECTION_ITEM)
+                throw new IOException("Malformed content");
 
-            _values.put(key.getValue(), value.getValue());
+            StringSendable key = (StringSendable) reader.read(StringSendable.WHAT);
+            NetworkSendable value = reader.read();
+
+            _values.put(key.getValue(), value);
         }
     }
 
@@ -155,23 +186,14 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
         SendableWriter writer = new SendableWriter(context, stream);
 
         StringSendable key = new StringSendable();
-
-        for (Entry<String, Object> entry : this) {
+        for (Entry<String, NetworkSendable> entry : this) {
             stream.writeByte(STREAM_COLLECTION_ITEM);
-
             key.setValue(entry.key());
+
             writer.write(key);
-
-            Object value = entry.value();
-            if (value instanceof String) {
-                key.setValue((String) value);
-                writer.write(key);
-            } else {
-                writer.write(new ValueSendable(value));
-            }
-
-            stream.writeByte(STREAM_COLLECTION_ITEM);
+            writer.write(entry.value());
         }
+
         stream.writeByte(STREAM_COLLECTION_END);
     }
 }

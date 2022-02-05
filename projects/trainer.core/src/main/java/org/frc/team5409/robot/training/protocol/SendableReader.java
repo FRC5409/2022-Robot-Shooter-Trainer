@@ -17,7 +17,7 @@ public class SendableReader {
     public NetworkSendable read() throws IOException {
         long what = _stream.readLong();
 
-        Factory<? extends NetworkSendable> sendableFactory = _context.getSendableFactory(what);
+        Factory<? extends NetworkSendable> sendableFactory = _context.getRegistry().getSendableFactory(what);
         if (sendableFactory == null)
             throw new IOException("Unexpected 'what' in sendable, got 0x"+Long.toHexString(what));
 
@@ -30,7 +30,7 @@ public class SendableReader {
     public NetworkSendable read(long what) throws IOException {
         long readWhat = _stream.readLong();
 
-        Factory<? extends NetworkSendable> sendableFactory = _context.getSendableFactory(what);
+        Factory<? extends NetworkSendable> sendableFactory = _context.getRegistry().getSendableFactory(what);
         if (sendableFactory == null)
             throw new IOException("Unexpected 'what' in sendable, got 0x" + Long.toHexString(what));
         else if (readWhat != what)
