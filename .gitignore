@@ -1,3 +1,4 @@
 /.gradle
 /.idea
 /projects/**/build
+/projects/**/bin
