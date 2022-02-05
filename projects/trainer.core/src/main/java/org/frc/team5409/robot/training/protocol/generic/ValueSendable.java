@@ -1,5 +1,8 @@
-package org.frc.team5409.robot.training.protocol;
+package org.frc.team5409.robot.training.protocol.generic;
 
+import org.frc.team5409.robot.training.protocol.NetworkSendable;
+import org.frc.team5409.robot.training.protocol.SendableContext;
+import org.frc.team5409.robot.training.protocol.SendableRegistar;
 import org.frc.team5409.robot.training.util.Type;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,8 +1,9 @@
-package org.frc.team5409.robot.training.protocol;
+package org.frc.team5409.robot.training.protocol.generic;
 
 import org.frc.team5409.robot.training.collections.Entry;
 import org.frc.team5409.robot.training.collections.EntryIterable;
 import org.frc.team5409.robot.training.collections.EntryIterator;
+import org.frc.team5409.robot.training.protocol.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInputStream;

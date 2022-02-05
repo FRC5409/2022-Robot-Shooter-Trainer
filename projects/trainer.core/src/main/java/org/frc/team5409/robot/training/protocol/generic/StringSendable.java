@@ -1,5 +1,8 @@
-package org.frc.team5409.robot.training.protocol;
+package org.frc.team5409.robot.training.protocol.generic;
 
+import org.frc.team5409.robot.training.protocol.NetworkSendable;
+import org.frc.team5409.robot.training.protocol.SendableContext;
+import org.frc.team5409.robot.training.protocol.SendableRegistar;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +71,6 @@ public class StringSendable implements NetworkSendable {
         if (_value == null)
             throw new IOException("Cannot write 'null' value.");
 
-        // TODO see if this includes EOF character
         stream.write(_value.getBytes(StandardCharsets.US_ASCII));
         stream.writeByte(EOF);
     }
