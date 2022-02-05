@@ -2,9 +2,6 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 16
-targetCompatibility = 16
-
 dependencies {
     implementation 'org.jetbrains:annotations:20.1.0'
 }
