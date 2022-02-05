@@ -16,4 +16,8 @@ public class SendableWriter {
         _stream.writeLong(sendable.what());
         sendable.write(_context, _stream);
     }
+
+    public void flush() throws IOException {
+        _stream.flush();
+    }
 }
