@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation project(':trainer.core')
+}
+
+jar {
+    debug true
+}
+
+repositories {
+    mavenCentral()
+}
