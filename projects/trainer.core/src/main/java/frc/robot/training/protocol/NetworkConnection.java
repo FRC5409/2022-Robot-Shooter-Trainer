@@ -2,24 +2,14 @@ package frc.robot.training.protocol;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import frc.robot.training.protocol.NetworkExecutors;
-import frc.robot.training.protocol.NetworkRequest;
-import frc.robot.training.protocol.NetworkRequestResult;
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.NetworkSocket;
-import frc.robot.training.protocol.SendableContext;
-import frc.robot.training.protocol.SendableReader;
-import frc.robot.training.protocol.SendableWriter;
-
-public class NetworkServer {
+public class NetworkConnection {
     private final NetworkSocket   _socket;
     private final SendableContext _context;
 
-    public NetworkServer(NetworkSocket socket, SendableContext context) {
+    public NetworkConnection(NetworkSocket socket, SendableContext context) {
         _socket = socket;
         _context = context;
     }
@@ -59,5 +49,18 @@ public class NetworkServer {
 
         NetworkExecutors.getInstance().submit(task);
         return task;
+    }
+
+    public NetworkSocket getSocket() {
+        return _socket;
+    }
+
+
+    public boolean isConnected() {
+        return _socket.isConnected();
+    }
+
+    public void close() throws IOException {
+        _socket.close();
     }
 }
