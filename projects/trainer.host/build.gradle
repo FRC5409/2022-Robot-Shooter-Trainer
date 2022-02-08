@@ -4,11 +4,15 @@ plugins {
 
 dependencies {
     implementation 'org.jetbrains:annotations:20.1.0'
+    implementation 'com.opencsv:opencsv:4.1'
     implementation project(':trainer.core')
 }
 
 jar {
-    debug true
+
+    manifest {
+        attributes 'Main-Class': "frc.robot.training.Main"
+    }
 }
 
 repositories {
