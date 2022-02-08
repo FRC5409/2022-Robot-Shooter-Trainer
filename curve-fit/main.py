@@ -43,8 +43,8 @@ def get_data_file(path):
 
     assert len(x_in) == len(y_in), AssertionError("Inputs are of different lengths.")
 
-    x = torch.tensor(x_in, requires_grad=True, dtype=torch.double).reshape((len(y_in), 1))
-    y = torch.tensor(y_in, requires_grad=True, dtype=torch.double).reshape((len(y_in), 1))
+    x = torch.tensor(x_in, requires_grad=False, dtype=torch.double).reshape((len(y_in), 1))
+    y = torch.tensor(y_in, requires_grad=False, dtype=torch.double).reshape((len(y_in), 1))
 
     idx = torch.randperm(len(x_in))
 
