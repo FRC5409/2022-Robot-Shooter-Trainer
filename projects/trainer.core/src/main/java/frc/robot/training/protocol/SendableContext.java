@@ -1,8 +1,5 @@
 package frc.robot.training.protocol;
 
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.SendableRegistry;
-
 public class SendableContext {
     private final SendableRegistry _registry;
 

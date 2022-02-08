@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-import frc.robot.training.collections.Entry;
-
 public class EntryIterator<K, V> implements Iterator<Entry<K,V>> {
     private final Iterator<Map.Entry<K, V>> _base;
 

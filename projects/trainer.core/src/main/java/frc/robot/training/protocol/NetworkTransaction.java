@@ -1,7 +1,5 @@
 package frc.robot.training.protocol;
 
-import frc.robot.training.protocol.NetworkSendable;
-
 public class NetworkTransaction {
     private final NetworkSendable _payload;
 

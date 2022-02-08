@@ -4,16 +4,6 @@ import java.io.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import frc.robot.training.protocol.NetworkExecutors;
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.NetworkSocket;
-import frc.robot.training.protocol.NetworkStatus;
-import frc.robot.training.protocol.NetworkTransaction;
-import frc.robot.training.protocol.NetworkTransactionResult;
-import frc.robot.training.protocol.SendableContext;
-import frc.robot.training.protocol.SendableReader;
-import frc.robot.training.protocol.SendableWriter;
-
 public class NetworkClient {
     private final NetworkSocket _socket;
     private final SendableContext _context;

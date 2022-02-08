@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.ServerSocket;
 
 import frc.robot.training.protocol.NetworkServerSocket;
-import frc.robot.training.protocol.NetworkSocket;
 
 public class NetworkServerSocket {
     public static final int DEFAULT_PORT = 5409;

@@ -3,7 +3,6 @@ package frc.robot.training.protocol.generic;
 import frc.robot.training.collections.Entry;
 import frc.robot.training.collections.EntryIterable;
 import frc.robot.training.collections.EntryIterator;
-import frc.robot.training.protocol.*;
 import frc.robot.training.protocol.NetworkSendable;
 import frc.robot.training.protocol.SendableContext;
 import frc.robot.training.protocol.SendableReader;

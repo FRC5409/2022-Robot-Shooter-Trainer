@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import frc.robot.training.util.Factory;
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.SendableRegistryBuilder;
-import frc.robot.training.protocol.SendableRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 public class SendableRegistry {

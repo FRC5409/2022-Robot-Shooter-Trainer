@@ -3,9 +3,6 @@ package frc.robot.training.protocol;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.SendableContext;
-
 public class SendableWriter {
     private final SendableContext _context;
     private final DataOutputStream _stream;

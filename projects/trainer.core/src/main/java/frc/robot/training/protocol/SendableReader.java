@@ -4,8 +4,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import frc.robot.training.util.Factory;
-import frc.robot.training.protocol.NetworkSendable;
-import frc.robot.training.protocol.SendableContext;
 
 public class SendableReader {
     private final SendableContext _context;
