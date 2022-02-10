@@ -2,3 +2,5 @@
 /.idea
 /projects/**/build
 /projects/**/bin
+
+__pycache__/
