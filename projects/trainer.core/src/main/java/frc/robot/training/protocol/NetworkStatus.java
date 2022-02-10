@@ -6,12 +6,14 @@ import frc.robot.training.protocol.NetworkStatus;
 import org.jetbrains.annotations.Nullable;
 
 public enum NetworkStatus {
-    STATUS_OK(400),
-    STATUS_ERROR(300),
-    STATUS_UNAVAILABLE(404);
+    STATUS_NONE(0x00),
+    STATUS_OK(0xA0),
+    STATUS_ERROR(0x3C),
+    STATUS_UNAVAILABLE(0x44),
+    STATUS_INTERRUPTED(0x55);
 
     @Nullable
-    public static final NetworkStatus fromId(int id) {
+    public static NetworkStatus fromId(int id) {
         return STATUS_ID_MAP.get(id);
     }
 
@@ -23,7 +25,7 @@ public enum NetworkStatus {
 
     private final int _id;
 
-    private NetworkStatus(int id) {
+    NetworkStatus(int id) {
         _id = id;
     }
 

@@ -13,40 +13,35 @@ public class NetworkClient {
         _context = context;
     }
 
-    public NetworkTransactionResult submitTransaction(NetworkTransaction transaction) {
+    public NetworkResponse submitRequest(NetworkRequest request) throws IOException {
         if (_socket.isClosed())
-            return new NetworkTransactionResult(NetworkStatus.STATUS_UNAVAILABLE, null);
+            return new NetworkResponse(NetworkStatus.STATUS_UNAVAILABLE, null);
 
-        try {
-            SendableWriter writer = new SendableWriter(_context, _socket.getOutputStream());
+        // write request payload
+        SendableWriter writer = new SendableWriter(_context, _socket.getOutputStream());
+        writer.write(request.getPayload());
+        writer.flush();
 
-            writer.write(transaction.getPayload());
-            writer.flush();
-        } catch (IOException e) {
-            return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
-        }
+        // read response header
+        DataInputStream inputStream = _socket.getInputStream();
+        NetworkResponseHeader header = NetworkResponseHeader.decode(inputStream.readInt());
 
-        try {
-            DataInputStream stream = _socket.getInputStream();
-            SendableReader reader = new SendableReader(_context, stream);
-
-            int statusCode = stream.readInt();
-            NetworkStatus status = NetworkStatus.fromId(statusCode);
-
-            if (status == null)
-                throw new IOException("Unexpected status code 0x" + Integer.toHexString(statusCode));
-
-            NetworkSendable result = reader.read();
-
-            return new NetworkTransactionResult(status, result);
-        } catch (IOException e) {
-            return new NetworkTransactionResult(NetworkStatus.STATUS_ERROR, null, e);
+        // check if request response contains payload
+        if (header.hasFlag(NetworkResponseHeader.FLAG_SENDABLE_PAYLOAD)) {
+            SendableReader reader = new SendableReader(_context, inputStream);
+            return new NetworkResponse(header.status, reader.read());
+        } else {
+            return new NetworkResponse(header.status);
         }
     }
 
-    public Future<NetworkTransactionResult> submitTransactionAsync(NetworkTransaction transaction) {
-        FutureTask<NetworkTransactionResult> task = new FutureTask<>(() -> submitTransaction(transaction));
+    public Future<NetworkResponse> submitRequestAsync(NetworkRequest request) {
+        FutureTask<NetworkResponse> task = new FutureTask<>(() -> submitRequest(request));
         NetworkExecutors.getInstance().submit(task);
         return task;
+    }
+
+    public void close() throws IOException {
+        _socket.close();
     }
 }

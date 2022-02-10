@@ -14,35 +14,52 @@ public class NetworkConnection {
         _context = context;
     }
 
-
-    public NetworkRequest getRequest() throws IOException {
+    public NetworkServerRequest getRequest() throws IOException {
         SendableReader reader = new SendableReader(_context, _socket.getInputStream());
-        return new NetworkRequest(this, reader.read());
+        
+        try {
+            NetworkSendable payload = reader.read();
+            return new NetworkServerRequest(this, NetworkStatus.STATUS_OK, payload);
+        } catch (IOException e) {
+            return new NetworkServerRequest(this, NetworkStatus.STATUS_INTERRUPTED);
+        }
     }
 
-    public Future<NetworkRequest> getRequestAsync() {
-        FutureTask<NetworkRequest> task = new FutureTask<>(this::getRequest);
+    public Future<NetworkServerRequest> getRequestAsync() {
+        FutureTask<NetworkServerRequest> task = new FutureTask<>(this::getRequest);
         NetworkExecutors.getInstance().submit(task);
         return task;
     }
 
-    void fulfillRequest(NetworkRequest request, NetworkRequestResult result) throws IOException {
+    void submitResponse(NetworkServerResponse response) throws IOException {
         DataOutputStream stream = _socket.getOutputStream();
-        SendableWriter writer = new SendableWriter(_context, stream);
-        NetworkSendable payload = request.getPayload();
 
-        stream.writeInt(result.getStatus().id());
+        NetworkSendable payload = response.getPayload();
 
+        // get response header flags
+        int flags = NetworkResponseHeader.FLAG_NULL;
+
+        // enable sendable payload flag (if payload exists)
         if (payload != null)
+            flags |= NetworkResponseHeader.FLAG_SENDABLE_PAYLOAD;
+
+        // write response header
+        NetworkResponseHeader header = new NetworkResponseHeader(response.getStatus(), flags);
+        stream.writeInt(NetworkResponseHeader.encode(header));
+
+        // write payload (if payload exists)
+        if (payload != null) {
+            SendableWriter writer = new SendableWriter(_context, stream);
             writer.write(payload);
+        }
 
         stream.flush();
     }
 
-    public Future<Void> fulfillRequestAsync(NetworkRequest request, NetworkRequestResult result) {
+    Future<Void> submitResponseAsync(NetworkServerResponse response) {
         FutureTask<Void> task = new FutureTask<>(
             () -> {
-                fulfillRequest(request, result);
+                submitResponse(response);
                 return null;
             }
         );
@@ -54,7 +71,6 @@ public class NetworkConnection {
     public NetworkSocket getSocket() {
         return _socket;
     }
-
 
     public boolean isConnected() {
         return _socket.isConnected();
