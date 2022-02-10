@@ -5,11 +5,14 @@ import org.jetbrains.annotations.Nullable;
 
 public class Type {
     private static final Mapping<Class<?>, Class<?>> PRIMITIVE_MAP = Mapping.of(
-        char.class, Character.class,
+        byte.class, Byte.class,
         short.class, Short.class,
         int.class, Integer.class,
         long.class, Long.class,
-        boolean.class, Boolean.class
+        float.class, Float.class,
+        double.class, Double.class,
+        boolean.class, Boolean.class,
+        char.class, Character.class
     );
 
     public static boolean isPrimitiveType(Class<?> type) {
