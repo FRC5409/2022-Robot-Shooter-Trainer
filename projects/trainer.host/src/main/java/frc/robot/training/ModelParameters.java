@@ -1,5 +1,7 @@
 package frc.robot.training;
 
+import java.util.Arrays;
+
 public class ModelParameters {
     private double[] _values;
 
@@ -9,7 +11,7 @@ public class ModelParameters {
 
     public ModelParameters(double[] values) {
         _values = new double[values.length];
-        System.arraycopy(_values, 0, values, 0, values.length);
+        System.arraycopy(values, 0, _values, 0, values.length);
     }
 
     public double get(int i) throws IndexOutOfBoundsException {
@@ -25,6 +27,6 @@ public class ModelParameters {
 
     @Override
     public String toString() {
-        return _values.toString();
+        return Arrays.toString(_values);
     }
 }

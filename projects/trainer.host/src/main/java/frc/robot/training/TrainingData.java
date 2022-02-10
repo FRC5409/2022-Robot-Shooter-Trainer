@@ -8,4 +8,12 @@ public class TrainingData {
         this.speed = speed;
         this.distance = distance;
     }
+
+    @Override
+    public String toString() {
+        return "{\n" +
+            "\tspeed    = " + speed +
+            "\n\tdistance = " + distance +
+            "\n}";
+    }
 }

@@ -1,9 +1,6 @@
 package frc.robot.training;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -11,42 +8,45 @@ import com.opencsv.CSVWriter;
 import org.jetbrains.annotations.Nullable;
 
 public class TrainingStorage {
-    private final StorageFile _modelStorage;
-    private final StorageFile _dataStorage;
+    private final File _modelStorage;
+    private final File _dataStorage;
 
-    public TrainingStorage(StorageFile modelStorage, StorageFile dataStorage) throws IOException {
+    public TrainingStorage(File modelStorage, File dataStorage) throws IOException {
         _dataStorage = dataStorage;
         _modelStorage = modelStorage;
     }
 
     public void writeTrainingData(TrainingData data) throws IOException {
-        CSVWriter writer = new CSVWriter(_dataStorage.getWriter());
+        FileWriter fileWriter = new FileWriter(_dataStorage, true);
+        CSVWriter writer = new CSVWriter(fileWriter, ',', ' ', '"', "\n");
 
         writer.writeNext(
-            new String[]{ Double.toString(data.distance), Double.toString(data.speed) }
+            new String[]{
+                Double.toString(data.distance), Double.toString(data.speed)
+            }
         );
 
         writer.close();
+        fileWriter.close();
     }
 
     @Nullable
     public ModelParameters getModelParameters(int size) throws IOException {
-        FileReader fileReader = _modelStorage.getReader();
-            fileReader.reset();
-
-        CSVReader reader = new CSVReader(fileReader);
-        String[] rawparams = reader.readNext();
+        CSVReader reader = new CSVReader(new FileReader(_modelStorage));
+        String[] params = reader.readNext();
         reader.close();
         
-        if (rawparams.length == 0) {
+        if (params == null || params.length == 0) {
             return null;
-        } else if (rawparams.length != size) {
-            throw new IOException("Expected " + size + " parameters, got " + rawparams.length);
+        } else if (params.length != size) {
+            throw new IOException("Expected " + size + " parameters, got " + params.length);
         }
 
         double[] values = new double[size];
         for (int i = 0; i < size; i++) {
-            values[i] = Double.parseDouble(rawparams[i]);
+            // if any of the params of nan values, skip
+            if (params[i].equals("nan")) return null;
+            values[i] = Double.parseDouble(params[i]);
         }
 
         return new ModelParameters(values);
