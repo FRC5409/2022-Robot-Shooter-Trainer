@@ -2,6 +2,8 @@ plugins {
     id 'java-library'
 }
 
+version '0.1-alpha'
+
 dependencies {
     implementation 'org.jetbrains:annotations:20.1.0'
 }
