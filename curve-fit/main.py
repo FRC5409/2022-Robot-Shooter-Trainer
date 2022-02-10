@@ -38,8 +38,9 @@ def get_data_file(path):
     y_in = []
 
     for line in file.readlines():
-        x_in.append(int(line.split(',')[0]))
-        y_in.append(int(line.split(',')[1]))
+        v = line.split(',')
+        x_in.append(float(v[0]))
+        y_in.append(float(v[1]))
 
     assert len(x_in) == len(y_in), AssertionError("Inputs are of different lengths.")
 
@@ -65,7 +66,6 @@ def fit(model, x_train, y_train):
 
         y_pred = model(x_train)
         loss = loss_fn(y_train, y_pred)
-
         loss.backward()
 
         optimizer.step()
@@ -94,7 +94,6 @@ def main():
     out_path = './out.txt'
 
     degree = 1
-    search_all = False
 
     args = sys.argv[1:]
     print(args)
@@ -102,12 +101,9 @@ def main():
     # arg format: thing=value
     for arg in args:
         name, value = arg.split('=')
-
+        print(name, value)
         if name == 'degree':
             degree = min(max(int(value), 0), 5)
-
-        elif name == 'search_all':
-            search_all = (value == 'True')
 
         elif name == 'in_path':
             in_path = value
@@ -115,44 +111,25 @@ def main():
         elif name == 'out_path':
             out_path = value
 
-    x_train, y_train, x_test, y_test = get_data_random()
+    x_train, y_train, x_test, y_test = get_data_random() # get_data_file(in_path)
 
-    if degree == 1 or search_all:
-        linear = Linear()
-        fit(linear, x_train, y_train)
+    model = None
+    if degree == 1:
+        model = Linear()
+    elif degree == 2:
+        model = Quadratic()
+    elif degree == 3:
+        model = Cubic()
+    elif degree == 4:
+        model = Quartic()
+    elif degree == 5:
+        model = Quintic()
 
-        print(linear.state_dict())
-        print(test(linear, x_test, y_test))
+    fit(model, x_train, y_train)
+    print(model.state_dict())
+    print(test(model, x_test, y_test))
 
-        save(linear, out_path)
-
-    if degree == 2 or search_all:
-        quad = Quadratic()
-        fit(quad, x_train, y_train)
-
-        print(quad.state_dict())
-        print(test(quad, x_test, y_test))
-
-    if degree == 3 or search_all:
-        cubic = Cubic()
-        fit(cubic, x_train, y_train)
-
-        print(cubic.state_dict())
-        print(test(cubic, x_test, y_test))
-
-    if degree == 4 or search_all:
-        quartic = Quartic()
-        fit(quartic, x_train, y_train)
-
-        print(quartic.state_dict())
-        print(test(quartic, x_test, y_test))
-
-    if degree == 5 or search_all:
-        quintic = Quintic()
-        fit(quintic, x_train, y_train)
-
-        print(quintic.state_dict())
-        print(test(quintic, x_test, y_test))
+    save(model, out_path)
 
 
 if __name__ == "__main__":
