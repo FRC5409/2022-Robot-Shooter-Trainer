@@ -8,13 +8,6 @@ dependencies {
     implementation project(':trainer.core')
 }
 
-jar {
-
-    manifest {
-        attributes 'Main-Class': "frc.robot.training.Main"
-    }
-}
-
 repositories {
     mavenCentral()
 }
