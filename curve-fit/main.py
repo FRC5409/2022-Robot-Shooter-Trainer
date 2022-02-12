@@ -66,10 +66,10 @@ def fit(model, x_train, y_train):
 
         y_pred = model(x_train)
         loss = loss_fn(y_train, y_pred)
-        loss.backward()
 
-        optimizer.step()
         optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 
 def test(model, x_test, y_test):
@@ -126,8 +126,8 @@ def main():
         model = Quintic()
 
     fit(model, x_train, y_train)
-    print(model.state_dict())
-    print(test(model, x_test, y_test))
+    # print(model.state_dict())
+    print(f"Accuracy: {test(model, x_test, y_test)}")
 
     save(model, out_path)
 
