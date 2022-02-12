@@ -12,6 +12,12 @@ public class TrainingStorage {
     private final File _dataStorage;
 
     public TrainingStorage(File modelStorage, File dataStorage) throws IOException {
+        if (!modelStorage.exists() && !modelStorage.createNewFile())
+            throw new IOException("Failed to create file '" + modelStorage + "'");
+
+        if (!dataStorage.exists() && !dataStorage.createNewFile())
+            throw new IOException("Failed to create file '" + dataStorage + "'");
+
         _dataStorage = dataStorage;
         _modelStorage = modelStorage;
     }
@@ -44,7 +50,7 @@ public class TrainingStorage {
 
         double[] values = new double[size];
         for (int i = 0; i < size; i++) {
-            // if any of the params of nan values, skip
+            // if any of the params are nan values, discard model
             if (params[i].equals("nan")) return null;
             values[i] = Double.parseDouble(params[i]);
         }
