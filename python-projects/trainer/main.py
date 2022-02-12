@@ -111,7 +111,7 @@ def main():
         elif name == 'out_path':
             out_path = value
 
-    x_train, y_train, x_test, y_test = get_data_random() # get_data_file(in_path)
+    x_train, y_train, x_test, y_test = get_data_file(in_path)
 
     model = None
     if degree == 1:
@@ -126,7 +126,7 @@ def main():
         model = Quintic()
 
     fit(model, x_train, y_train)
-    # print(model.state_dict())
+
     print(f"Accuracy: {test(model, x_test, y_test)}")
 
     save(model, out_path)
