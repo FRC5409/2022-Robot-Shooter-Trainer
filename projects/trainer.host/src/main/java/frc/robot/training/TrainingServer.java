@@ -50,7 +50,7 @@ public class TrainingServer {
             context.registerSendable(KeyValueSendable.class);
             context.registerSendable(StringSendable.class);
 
-        _logger.config("Using configuration:\n" + configuration);
+        _logger.info("Using configuration:\n" + configuration);
 
         _executor = new TrainerExecutor(configuration.trainerExecutableFile, configuration.trainerProgramFile);
         _trainerArguments = new TrainerExecutionArguments();

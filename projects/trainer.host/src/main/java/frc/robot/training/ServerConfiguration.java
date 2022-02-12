@@ -25,15 +25,15 @@ public class ServerConfiguration {
         }
         if (dataStorageFile != null) {
             builder.append("\n\tdataStorageFile       = ");
-            builder.append(dataStorageFile);
+            builder.append(dataStorageFile.getAbsolutePath());
         }
         if (modelParametersFile != null) {
             builder.append("\n\tmodelParametersFile   = ");
-            builder.append(modelParametersFile);
+            builder.append(modelParametersFile.getAbsolutePath());
         }
         if (trainerProgramFile != null) {
             builder.append("\n\ttrainerProgramFile    = ");
-            builder.append(trainerProgramFile);
+            builder.append(trainerProgramFile.getAbsolutePath());
         }
         if (trainerExecutableFile != null) {
             builder.append("\n\ttrainerExecutableFile = ");
