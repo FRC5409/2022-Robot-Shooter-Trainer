@@ -12,11 +12,17 @@ public class TrainingStorage {
     private final File _dataStorage;
 
     public TrainingStorage(File modelStorage, File dataStorage) throws IOException {
-        if (!modelStorage.exists() && !modelStorage.createNewFile())
-            throw new IOException("Failed to create file '" + modelStorage + "'");
+        if (!modelStorage.exists()) {
+            modelStorage.getParentFile().mkdirs();
+            if (!modelStorage.createNewFile())
+                throw new IOException("Failed to create file '" + modelStorage + "'");
+        }
 
-        if (!dataStorage.exists() && !dataStorage.createNewFile())
-            throw new IOException("Failed to create file '" + dataStorage + "'");
+        if (!dataStorage.exists()) {
+            dataStorage.getParentFile().mkdirs();
+            if (!dataStorage.createNewFile())
+                throw new IOException("Failed to create file '" + dataStorage + "'");
+        }
 
         _dataStorage = dataStorage;
         _modelStorage = modelStorage;
