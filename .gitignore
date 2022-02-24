@@ -1,8 +1,9 @@
 /.gradle
 /.idea
+/.temp
+/.maven
+/.vscode
 /projects/**/build
 /projects/**/bin
-/.temp
 __pycache__/
-/.vscode
 *.jar
