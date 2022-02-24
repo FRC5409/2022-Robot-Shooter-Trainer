@@ -1,5 +1,6 @@
 import sys
 
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as tck
 
@@ -14,6 +15,7 @@ DEFAULT_MAX_SPEED: Final          = "1000"
 DEFAULT_MIN_SPEED: Final          = "0"
 DEFAULT_MAX_DISTANCE: Final       = "10"
 DEFAULT_MIN_DISTANCE: Final       = "0"
+DEFAULT_BACKEND: Final            = "TkAgg"
 
 def main(args):
     # Get arguments
@@ -25,6 +27,8 @@ def main(args):
 
     max_distance = float(args.get("max_distance", DEFAULT_MAX_DISTANCE))
     min_distance = float(args.get("min_distance", DEFAULT_MIN_DISTANCE))
+
+    matplotlib.use(args.get("backend", DEFAULT_BACKEND))
 
     if max_speed > min_speed:
         temp = max_speed
