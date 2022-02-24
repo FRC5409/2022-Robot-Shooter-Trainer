@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
 import frc.robot.training.protocol.*;
-import frc.robot.training.protocol.generic.KeyValueSendable;
+import frc.robot.training.protocol.generic.ArraySendable;
+import frc.robot.training.protocol.generic.BundleSendable;
 import frc.robot.training.protocol.generic.StringSendable;
 import frc.robot.training.protocol.generic.ValueSendable;
 
@@ -47,8 +49,9 @@ public class TrainingServer {
 
         SendableContext context = new SendableContext();
             context.registerSendable(ValueSendable.class);
-            context.registerSendable(KeyValueSendable.class);
+            context.registerSendable(BundleSendable.class);
             context.registerSendable(StringSendable.class);
+            context.registerSendable(ArraySendable.class);
 
         _logger.info("Using configuration:\n" + configuration);
 
@@ -90,7 +93,7 @@ public class TrainingServer {
                 continue;
             }
 
-            KeyValueSendable payload = (KeyValueSendable) request.getPayload();
+            BundleSendable payload = (BundleSendable) request.getPayload();
             _logger.info("Got request " + payload);
 
             StringSendable topic = (StringSendable) payload.getSendable("trainer.topic");
@@ -101,7 +104,7 @@ public class TrainingServer {
             } else {
                 _logger.warning("Received request on unknown topic '" + topic.getValue());
                 
-                KeyValueSendable out = new KeyValueSendable();
+                BundleSendable out = new BundleSendable();
                 out.putSendable("reason", new StringSendable("Topic '" + topic.getValue() + "' does not exist."));
                 request.fulfill(new NetworkServerResponse(NetworkStatus.STATUS_ERROR, out));
             }
@@ -116,14 +119,17 @@ public class TrainingServer {
     // trainer:getModel
     private void requestModel(NetworkServerRequest request) throws IOException {
         NetworkStatus status;
-        KeyValueSendable out = new KeyValueSendable();
+        BundleSendable out = new BundleSendable();
 
         if (_model != null) {
-            out.putInteger("trainer.model.size", _parametersSize);
-
-            for (int i = 0; i < _parametersSize; i++) {
-                out.putDouble("trainer.model.parameters["+i+"]", _model.get(i));
-            }
+            out.putSendable(
+                "trainer.model.parameters",
+                new ArraySendable(
+                    _model.values().stream()
+                        .map(ValueSendable::new)
+                        .collect(Collectors.toUnmodifiableList())
+                )
+            );
 
             _logger.info("Fulfilled model request.");
 
@@ -140,10 +146,10 @@ public class TrainingServer {
     
     // trainer:submitData
     private void processData(NetworkServerRequest request) throws IOException {
-        KeyValueSendable payload = (KeyValueSendable) Objects.requireNonNull(request.getPayload());
+        BundleSendable payload = (BundleSendable) Objects.requireNonNull(request.getPayload());
 
         NetworkStatus status;
-        KeyValueSendable out = new KeyValueSendable();
+        BundleSendable out = new BundleSendable();
 
         try {
             TrainingData data = new TrainingData(
@@ -164,10 +170,14 @@ public class TrainingServer {
             if (_model != null) {
                 _logger.info("Finished training model. Got parameters:\n" + _model);
 
-                out.putInteger("trainer.model.size", _parametersSize);
-                for (int i = 0; i < _parametersSize; i++) {
-                    out.putDouble("trainer.model.parameters[" + i + "]", _model.get(i));
-                }
+                out.putSendable(
+                    "trainer.model.parameters",
+                    new ArraySendable(
+                        _model.values().stream()
+                            .map(ValueSendable::new)
+                            .collect(Collectors.toUnmodifiableList())
+                    )
+                );
 
                 _logger.info("Completed data submission.");
 
