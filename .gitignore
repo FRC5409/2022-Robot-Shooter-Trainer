@@ -4,3 +4,5 @@
 /projects/**/bin
 /.temp
 __pycache__/
+/.vscode
+*.jar
