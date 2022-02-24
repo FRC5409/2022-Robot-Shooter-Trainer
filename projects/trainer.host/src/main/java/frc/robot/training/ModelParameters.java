@@ -1,32 +1,37 @@
 package frc.robot.training;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ModelParameters {
-    private double[] _values;
+    private List<Double> _values;
 
     public ModelParameters() {
-        _values = new double[0];
+        _values = Collections.emptyList();
     }
 
     public ModelParameters(double[] values) {
-        _values = new double[values.length];
-        System.arraycopy(values, 0, _values, 0, values.length);
+        _values = Arrays.stream(values)
+            .boxed()
+            .collect(Collectors.toUnmodifiableList());
     }
 
-    public double get(int i) throws IndexOutOfBoundsException {
-        if (i > _values.length || i < 0)
-            throw new IndexOutOfBoundsException(i);
-    
-        return _values[i];
+    public double get(int index) throws IndexOutOfBoundsException {
+        return _values.get(index);
     } 
 
+    public List<Double> values() {
+        return _values;
+    }
+
     public int size() {
-        return _values.length;
+        return _values.size();
     }
 
     @Override
     public String toString() {
-        return Arrays.toString(_values);
+        return _values.toString();
     }
 }
