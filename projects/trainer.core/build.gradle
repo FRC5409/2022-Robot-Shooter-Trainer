@@ -1,16 +1,56 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
+
+version '0.2.1'
+group 'org.frc.team5409'
+
+description '''
+A platform agnostic protocol for exchanging arbitrary serializable
+objects over network in embedded robotics environments.
+'''
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
-version '0.2-alpha'
-
-dependencies {
-    implementation 'org.jetbrains:annotations:20.1.0'
-}
-
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains:annotations:22.0.0'
+}
+
+
+publishing {
+    repositories {
+        maven {
+            url = rootProject.file(MAVEN_ROOT_DIRECTORY)
+        }
+    }
+
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                url = 'https://github.com/FRC5409/2022-Robot-Shooter-Trainer'
+
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'keith-davies'
+                        name = 'Keith Davies'
+                    }
+                }
+            }
+
+            from components.java
+        }
+    }
 }
