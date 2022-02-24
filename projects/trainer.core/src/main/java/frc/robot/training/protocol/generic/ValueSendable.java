@@ -3,20 +3,20 @@ package frc.robot.training.protocol.generic;
 import frc.robot.training.protocol.NetworkSendable;
 import frc.robot.training.protocol.SendableContext;
 import frc.robot.training.protocol.SendableRegistryBuilder;
-import frc.robot.training.util.Type;
 import org.jetbrains.annotations.Nullable;
+import frc.robot.training.util.Type;
 
 import java.io.*;
 import java.util.Map;
 import java.util.Objects;
 
 public class ValueSendable implements NetworkSendable {
+    public static final long WHAT = -7383229974325473331L;
+
     @SuppressWarnings("unused")
     private static void register(SendableRegistryBuilder registry) {
-        registry.registerFactory(ValueSendable.WHAT, ValueSendable.class, ValueSendable::new);
+        registry.registerFactory(WHAT, ValueSendable.class, ValueSendable::new);
     }
-
-    public static final long WHAT = -7383229974325473331L;
 
     public static final byte DATA_TYPE_NULL    = -1;
     public static final byte DATA_TYPE_BYTE    = 0x0;
@@ -29,14 +29,14 @@ public class ValueSendable implements NetworkSendable {
     public static final byte DATA_TYPE_BOOLEAN = 0x7;
 
     private static final Map<Class<?>, Byte> DATA_TYPE_MAP = Map.of(
-        Byte.class, DATA_TYPE_BYTE,
+        Byte.class,      DATA_TYPE_BYTE,
         Character.class, DATA_TYPE_CHAR,
-        Short.class, DATA_TYPE_SHORT,
-        Integer.class, DATA_TYPE_INT,
-        Float.class, DATA_TYPE_FLOAT,
-        Long.class, DATA_TYPE_LONG,
-        Double.class, DATA_TYPE_DOUBLE,
-        Boolean.class, DATA_TYPE_BOOLEAN
+        Short.class,     DATA_TYPE_SHORT,
+        Integer.class,   DATA_TYPE_INT,
+        Float.class,     DATA_TYPE_FLOAT,
+        Long.class,      DATA_TYPE_LONG,
+        Double.class,    DATA_TYPE_DOUBLE,
+        Boolean.class,   DATA_TYPE_BOOLEAN
     );
 
     protected Object   _value;

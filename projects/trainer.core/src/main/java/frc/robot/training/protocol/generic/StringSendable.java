@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class StringSendable implements NetworkSendable {
+    public static final long WHAT = 3273615128644272490L;
+
     @SuppressWarnings("unused")
     private static void register(SendableRegistryBuilder registry) {
-        registry.registerFactory(StringSendable.WHAT, StringSendable.class, StringSendable::new);
+        registry.registerFactory(WHAT, StringSendable.class, StringSendable::new);
     }
-
-    public static final long WHAT = 3273615128644272490L;
 
     private static final byte EOF = '\0';
     private static final int BUFFER_SIZE = 1204;
