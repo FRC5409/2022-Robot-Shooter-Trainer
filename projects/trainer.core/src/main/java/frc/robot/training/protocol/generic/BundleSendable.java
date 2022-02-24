@@ -1,5 +1,7 @@
 package frc.robot.training.protocol.generic;
 
+import org.jetbrains.annotations.NotNull;
+
 import frc.robot.training.collections.Entry;
 import frc.robot.training.collections.EntryIterable;
 import frc.robot.training.collections.EntryIterator;
@@ -8,7 +10,6 @@ import frc.robot.training.protocol.SendableContext;
 import frc.robot.training.protocol.SendableReader;
 import frc.robot.training.protocol.SendableRegistryBuilder;
 import frc.robot.training.protocol.SendableWriter;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -17,26 +18,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Inspired by android bundles
-public class KeyValueSendable implements NetworkSendable, EntryIterable<String, NetworkSendable> {
+public class BundleSendable implements NetworkSendable, EntryIterable<String, NetworkSendable> {
+    public static final long WHAT = 4019083808795941718L;
+    
     @SuppressWarnings("unused")
     private static void register(SendableRegistryBuilder registry) {
-        registry.registerFactory(KeyValueSendable.WHAT, KeyValueSendable.class, KeyValueSendable::new);
+        registry.registerFactory(WHAT, BundleSendable.class, BundleSendable::new);
         registry.registerSendable(ValueSendable.class);
         registry.registerSendable(StringSendable.class);
     }
-
-    public static final long WHAT = 4019083808795941718L;
 
     private static final byte STREAM_COLLECTION_ITEM = 0x1;
     private static final byte STREAM_COLLECTION_END = 0x2;
 
     protected Map<String, NetworkSendable> _values;
 
-    public KeyValueSendable() {
+    public BundleSendable() {
         _values = new HashMap<>();
     }
 
-    public KeyValueSendable(KeyValueSendable copy) {
+    public BundleSendable(BundleSendable copy) {
         _values = new HashMap<>(copy._values);
     }
 
@@ -200,14 +201,32 @@ public class KeyValueSendable implements NetworkSendable, EntryIterable<String, 
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("KeyValueSendable[" + size() + "]{\n");
+        StringBuilder builder = new StringBuilder("BundleSendable[" + size() + "] {\n");
 
         if (size() > 0) {
+            int maxIndent = 0;
+            for (String key : _values.keySet()) {
+                if (key.length() > maxIndent)
+                    maxIndent = key.length();
+            }
+
             for (Entry<String, NetworkSendable> entry : this) {
+                String key = entry.key();
+
                 builder.append("\t\"");
-                builder.append(entry.key());
-                builder.append("\" = ");
-                builder.append(entry.value());
+                builder.append(key);
+                builder.append('\"');
+                int indent = maxIndent - key.length();
+                for (int i = 0; i < indent; i++) {
+                    builder.append(' ');
+                }
+
+                builder.append(" = ");
+
+                builder.append(
+                    entry.value().toString()
+                    .replaceAll("(?<!\\G)(?m)^", "\t"));
+
                 builder.append(",\n");
             }
 
