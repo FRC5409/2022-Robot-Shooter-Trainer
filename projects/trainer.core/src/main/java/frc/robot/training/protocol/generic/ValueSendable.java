@@ -165,7 +165,7 @@ public class ValueSendable implements NetworkSendable {
     @Nullable
     public <T> T getValue(Class<T> type) {
         if (!type.isAssignableFrom(_type))
-            throw new IllegalArgumentException("Cannot cast value type '" + _type.getSimpleName() + "' to type '" + _type.getSimpleName() + "'");
+            throw new IllegalArgumentException("Cannot cast value type '" + type.getSimpleName() + "' to type '" + _type.getSimpleName() + "'");
         return type.cast(_value);
     }
 
