@@ -16,10 +16,12 @@ class StorageBase:
 
 class ModelStorage(StorageBase):
     _model: ModelParameters
+    _configuration: str
 
-    def __init__(self, target: str) -> None:
+    def __init__(self, target: str, configuration: str) -> None:
         super().__init__(target)
-        self._last_change_t = 0;
+        self.configuration = configuration
+        self._last_change_t = 0
         self._model = None
 
     def model(self) -> Optional[ModelParameters]:
@@ -48,12 +50,14 @@ class ModelStorage(StorageBase):
 
 
 class DataStorage(StorageBase):
+    configuration: str
     _points: np.array
     _speed: np.array
 
-    def __init__(self, target: str) -> None:
+    def __init__(self, target: str, configuration: str) -> None:
         super().__init__(target)
-        self._last_change_t = 0;
+        self.configuration = configuration
+        self._last_change_t = 0
         self._points = None
 
     def points(self) -> Optional[np.array]:
@@ -77,3 +81,8 @@ class DataStorage(StorageBase):
             points.append([ float(v[0]), float(v[1]) ])
 
         self._points = np.array(points)
+
+class ConfigurationStorage:
+    def __init__(self, model: ModelStorage, data: DataStorage) -> None:
+        self.model = model
+        self.data = data
