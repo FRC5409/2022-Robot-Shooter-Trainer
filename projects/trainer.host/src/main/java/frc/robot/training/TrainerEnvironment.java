@@ -63,8 +63,8 @@ public class TrainerEnvironment {
             throw new IOException("Failed to create data file");
 
         TrainerExecutionArguments executionArguments = new TrainerExecutionArguments();
-            executionArguments.inputFile = model;
-            executionArguments.outputFile = data;
+            executionArguments.inputFile = data;
+            executionArguments.outputFile = model;
             executionArguments.degree = _parametersSize - 1;
         
         TrainingStorage storage = new TrainingStorage(model, data);
@@ -81,8 +81,8 @@ public class TrainerEnvironment {
             throw new IOException("Data file does not exist.");
 
         TrainerExecutionArguments executionArguments = new TrainerExecutionArguments();
-            executionArguments.inputFile = model;
-            executionArguments.outputFile = data;
+            executionArguments.inputFile = data;
+            executionArguments.outputFile = model;
             executionArguments.degree = _parametersSize - 1;
         
         TrainingStorage storage = new TrainingStorage(model, data);
