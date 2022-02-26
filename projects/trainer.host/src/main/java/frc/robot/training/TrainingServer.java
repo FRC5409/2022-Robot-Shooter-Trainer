@@ -8,8 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.Nullable;
-
 import frc.robot.training.protocol.*;
 import frc.robot.training.protocol.generic.ArraySendable;
 import frc.robot.training.protocol.generic.BundleSendable;
@@ -17,21 +15,15 @@ import frc.robot.training.protocol.generic.StringSendable;
 import frc.robot.training.protocol.generic.ValueSendable;
 
 public class TrainingServer {
-    private final Logger _logger;
-
-    private NetworkConnection _connection;
-    private ServerSocket _socket;
-
-    private TrainerExecutor _executor;
-    private TrainerExecutionArguments _trainerArguments;
-
-    private TrainingStorage _storage;
-
-    @Nullable
-    private ModelParameters _model;
-    private int _parametersSize;
-
+    private final Logger       _logger;
     private final Map<String, RequestConsumer> _topics;
+
+    private ServerSocket       _socket;
+    private NetworkConnection  _connection;
+
+    private TrainerExecutor    _executor;
+    private TrainerEnvironment _environment;
+    private int                _parametersSize;
 
     public TrainingServer() {
         _logger = Logger.getLogger("Server");
@@ -56,18 +48,8 @@ public class TrainingServer {
         _logger.info("Using configuration:\n" + configuration);
 
         _executor = new TrainerExecutor(configuration.trainerExecutableFile, configuration.trainerProgramFile);
-        _trainerArguments = new TrainerExecutionArguments();
-            _trainerArguments.outputFile = configuration.modelParametersFile;
-            _trainerArguments.inputFile = configuration.dataStorageFile;
-            _trainerArguments.degree = configuration.modelParametersSize - 1;
-
-        _storage = new TrainingStorage(
-            configuration.modelParametersFile,
-            configuration.dataStorageFile
-        );
-
+        _environment = new TrainerEnvironment(configuration.modelParametersSize, configuration.trainerEnvironment, _logger);
         _parametersSize = configuration.modelParametersSize;
-        _model = _storage.getModelParameters(_parametersSize);
 
         _socket = new ServerSocket(configuration.port);
 
@@ -118,14 +100,20 @@ public class TrainingServer {
 
     // trainer:getModel
     private void requestModel(NetworkServerRequest request) throws IOException {
+        BundleSendable payload = (BundleSendable) request.getPayload();
+
+        StringSendable configurationName = (StringSendable) payload.getSendable("trainer.configuration");
+        TrainerConfiguration configuration = _environment.getConfiguration(configurationName.getValue());
+
         NetworkStatus status;
         BundleSendable out = new BundleSendable();
 
-        if (_model != null) {
+        ModelParameters model = configuration.getModel();
+        if (model != null) {
             out.putSendable(
                 "trainer.model.parameters",
                 new ArraySendable(
-                    _model.values().stream()
+                    model.values().stream()
                         .map(ValueSendable::new)
                         .collect(Collectors.toUnmodifiableList())
                 )
@@ -152,35 +140,37 @@ public class TrainingServer {
         BundleSendable out = new BundleSendable();
 
         try {
+            StringSendable configurationName = (StringSendable) payload.getSendable("trainer.configuration");
+            TrainerConfiguration configuration = _environment.getConfiguration(configurationName.getValue());
+
             TrainingData data = new TrainingData(
                 payload.getDouble("trainer.data.speed"),
                 payload.getDouble("trainer.data.distance")
             );
 
-            _logger.info("Received values : " + data);
-
-            _logger.info("Training model...");
+            _logger.info("Training model on configuration '"+configuration.getName()+"'");
 
             // append training data to storage
-            _storage.writeTrainingData(data);
+            configuration.submitData(data);
+            
             // execute training
-            _executor.train(_trainerArguments);
-            _model = _storage.getModelParameters(_parametersSize);
+            configuration.executeTraining(_executor);
 
-            if (_model != null) {
-                _logger.info("Finished training model. Got parameters:\n" + _model);
-
+            ModelParameters model = configuration.getModel();
+            if (model != null) {
+                _logger.info("Finished training model. Got parameters:\n" + model);
+                
+                out.putSendable("trainer.configuration", configurationName);
                 out.putSendable(
                     "trainer.model.parameters",
                     new ArraySendable(
-                        _model.values().stream()
+                        model.values().stream()
                             .map(ValueSendable::new)
                             .collect(Collectors.toUnmodifiableList())
                     )
                 );
 
                 _logger.info("Completed data submission.");
-
                 status = NetworkStatus.STATUS_OK;
             } else {
                 _logger.warning("Finished training model. Got no parameters.");

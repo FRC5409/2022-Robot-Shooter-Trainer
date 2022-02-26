@@ -41,6 +41,7 @@ public class TestClient {
             double distance = random(0, 25);
             double speed = (distance*distance* a + b);
 
+            out.putSendable("trainer.configuration", new StringSendable("default"));
             out.putDouble("trainer.data.distance", distance/25);
             out.putDouble("trainer.data.speed", (speed-min)/(max-min));
 

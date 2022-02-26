@@ -5,8 +5,7 @@ import java.io.File;
 public class ServerConfiguration {
     public Integer port;
     public Integer modelParametersSize;
-    public File dataStorageFile;
-    public File modelParametersFile;
+    public File trainerEnvironment;
     public File trainerExecutableFile;
     public File trainerProgramFile;
 
@@ -19,22 +18,22 @@ public class ServerConfiguration {
             builder.append("\tport                  = ");
             builder.append(port);
         }
+
         if (modelParametersSize != null) {
             builder.append("\n\tmodelParametersSize   = ");
             builder.append(modelParametersSize);
         }
-        if (dataStorageFile != null) {
-            builder.append("\n\tdataStorageFile       = ");
-            builder.append(dataStorageFile.getAbsolutePath());
+
+        if (trainerEnvironment != null) {
+            builder.append("\n\ttrainerEnvironment    = ");
+            builder.append(trainerEnvironment.getAbsolutePath());
         }
-        if (modelParametersFile != null) {
-            builder.append("\n\tmodelParametersFile   = ");
-            builder.append(modelParametersFile.getAbsolutePath());
-        }
+
         if (trainerProgramFile != null) {
             builder.append("\n\ttrainerProgramFile    = ");
             builder.append(trainerProgramFile.getAbsolutePath());
         }
+
         if (trainerExecutableFile != null) {
             builder.append("\n\ttrainerExecutableFile = ");
             builder.append(trainerExecutableFile);

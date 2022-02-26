@@ -19,7 +19,7 @@ public class Main {
                 try {
                     // run server
                     server.run();
-                    active = false;
+                    //active = false;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -39,22 +39,20 @@ public class Main {
     }   
 
     private static ServerConfiguration parseArguments(String[] args) {
-        assert (args.length >= 5);
+        assert (args.length >= 4);
         ServerConfiguration config = new ServerConfiguration();
-        if (args.length == 5) {
+        if (args.length == 4) {
             config.port = DEFAULT_PORT;
-            config.dataStorageFile = new File(args[0]);
-            config.modelParametersFile = new File(args[1]);
+            config.trainerEnvironment = new File(args[0]);
+            config.modelParametersSize = Integer.parseInt(args[1]);
+            config.trainerExecutableFile = new File(args[2]);
+            config.trainerProgramFile = new File(args[3]);
+        } else {
+            config.port = Integer.parseInt(args[0]);
+            config.trainerEnvironment = new File(args[1]);
             config.modelParametersSize = Integer.parseInt(args[2]);
             config.trainerExecutableFile = new File(args[3]);
             config.trainerProgramFile = new File(args[4]);
-        } else {
-            config.port = Integer.parseInt(args[0]);
-            config.dataStorageFile = new File(args[1]);
-            config.modelParametersFile = new File(args[2]);
-            config.modelParametersSize = Integer.parseInt(args[3]);
-            config.trainerExecutableFile = new File(args[4]);
-            config.trainerProgramFile = new File(args[5]);
         }
 
         return config;
