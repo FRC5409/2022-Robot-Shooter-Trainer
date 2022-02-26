@@ -71,8 +71,8 @@ def main(args):
     points = dict()
 
     for name in configurations.keys():
-        colors = ((0.5,0.5,0.5), (0.5,0.5,0.5))
-        line, = ax.plot(x, y, color="r", label=name)
+        colors = createConfigurationColor(color_shade)
+        line, = ax.plot(x, y, color=colors[0], label=name)
         pts, = ax.plot([], marker='o', color=colors[1], linestyle='None')
 
         lines[name] = line
