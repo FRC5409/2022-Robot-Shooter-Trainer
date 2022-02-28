@@ -14,6 +14,7 @@ import frc.robot.training.protocol.SendableWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -204,19 +205,23 @@ public class BundleSendable implements NetworkSendable, EntryIterable<String, Ne
         StringBuilder builder = new StringBuilder("BundleSendable[" + size() + "] {\n");
 
         if (size() > 0) {
-            int maxIndent = 0;
+            int length = 0;
             for (String key : _values.keySet()) {
-                if (key.length() > maxIndent)
-                    maxIndent = key.length();
+                if (key.length() > length)
+                    length = key.length();
             }
 
-            for (Entry<String, NetworkSendable> entry : this) {
-                String key = entry.key();
+            ArrayList<Map.Entry<String, NetworkSendable>> entries = new ArrayList<>(_values.entrySet());
+            entries.sort(Map.Entry.comparingByKey());
+
+            for (Map.Entry<String, NetworkSendable> entry : entries) {
+                String key = entry.getKey();
 
                 builder.append("\t\"");
                 builder.append(key);
                 builder.append('\"');
-                int indent = maxIndent - key.length();
+
+                int indent = length - key.length();
                 for (int i = 0; i < indent; i++) {
                     builder.append(' ');
                 }
@@ -224,7 +229,7 @@ public class BundleSendable implements NetworkSendable, EntryIterable<String, Ne
                 builder.append(" = ");
 
                 builder.append(
-                    entry.value().toString()
+                    entry.getValue().toString()
                     .replaceAll("(?<!\\G)(?m)^", "\t"));
 
                 builder.append(",\n");
