@@ -163,10 +163,14 @@ public class ValueSendable implements NetworkSendable {
     }
 
     @Nullable
+    @SuppressWarnings("unchecked")
     public <T> T getValue(Class<T> type) {
-        if (!type.isAssignableFrom(_type))
+        if (Type.isUnwrappedType(type) && Type.getWrappedType(type).isAssignableFrom(_type))
+            return (T) _value;
+        else if (type.isAssignableFrom(_type))
+            return type.cast(_value);
+        else
             throw new IllegalArgumentException("Cannot cast value type '" + type.getSimpleName() + "' to type '" + _type.getSimpleName() + "'");
-        return type.cast(_value);
     }
 
     @Nullable
