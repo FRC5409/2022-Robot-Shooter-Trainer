@@ -1,3 +1,4 @@
+import colorsys
 from genericpath import isfile
 import os
 import random
@@ -78,7 +79,9 @@ def main(args):
         lines[name] = line
         points[name] = pts
 
-    while True:
+    plt.legend()
+    
+    while plt.fignum_exists(fig.number):
         for name, config in configurations.items():
             if (config.data.update()):
                 pts = config.data.points()
@@ -126,13 +129,13 @@ def getConfigurations(dir, model_name, data_name) -> Dict[str, ConfigurationStor
     return configs
 
 def createConfigurationColor(shade: float):
-    r = random.random()
-    g = random.random()
-    b = random.random()
+    hue = random.random()
+
+    shade = clamp(0, shade, 1)
 
     return (
-        (r, g, b), 
-        (clamp(0, r * shade, 1), clamp(0, g * shade, 1), clamp(0, b * shade, 1))
+        colorsys.hsv_to_rgb(hue, 1.0, 1.0), 
+        colorsys.hsv_to_rgb(hue, 1.0, shade) 
     )
 
 def clamp(min, x, max):
