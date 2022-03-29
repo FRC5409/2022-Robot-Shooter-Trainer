@@ -68,7 +68,7 @@ public class TrainerEnvironment {
             executionArguments.degree = _parametersSize - 1;
         
         TrainingStorage storage = new TrainingStorage(model, data);
-        return new TrainerConfiguration(name, _parametersSize, storage, executionArguments);
+        return new TrainerConfiguration(name, _parametersSize, storage, executionArguments, storage.getModelParameters(_parametersSize));
     }
 
     private TrainerConfiguration loadConfiguration(String name, File directory) throws IOException {
@@ -86,6 +86,6 @@ public class TrainerEnvironment {
             executionArguments.degree = _parametersSize - 1;
         
         TrainingStorage storage = new TrainingStorage(model, data);
-        return new TrainerConfiguration(name, _parametersSize, storage, executionArguments);
+        return new TrainerConfiguration(name, _parametersSize, storage, executionArguments, storage.getModelParameters(_parametersSize));
     }
 }

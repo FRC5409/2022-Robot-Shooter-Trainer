@@ -17,13 +17,14 @@ public class TrainerConfiguration {
         String name,
         int parametersSize,
         TrainingStorage storage,
-        TrainerExecutionArguments trainerArguments
+        TrainerExecutionArguments trainerArguments,
+        ModelParameters model
     ) {
         _name             = name;
         _trainerArguments = trainerArguments;
         _storage          = storage;
         _parametersSize   = parametersSize;
-        _model            = null;
+        _model            = model;
     }
 
     public void submitData(TrainingData data) throws IOException {
