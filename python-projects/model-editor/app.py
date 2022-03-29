@@ -59,7 +59,8 @@ class ModelEditorApplication(FigureCanvas):
         self.log()
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
-        self.save()
+        if not self.saved:
+            self.save()
         
     def save(self):
         for config in self.configurations.values():
@@ -85,7 +86,7 @@ class ModelEditorApplication(FigureCanvas):
         else:
             if not self.active: return
 
-            self.save_timer.start(int(self.options.update_time*10000))
+            self.save_timer.start(int(self.options.update_time*1000))
 
             self.active = False
         
