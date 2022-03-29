@@ -59,11 +59,11 @@ def main(args):
     plt.ylabel("Speed (rpm)")
 
     ax.xaxis.set_major_formatter(
-        tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(min_distance-max_distance)))
+        tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(min_distance-max_distance) + max_distance))
     )
 
     ax.yaxis.set_major_formatter(
-        tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(min_speed-max_speed)))
+        tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(min_speed-max_speed) + max_speed))
     )
     
     configurations = getConfigurations(environment, model_name, data_name)
