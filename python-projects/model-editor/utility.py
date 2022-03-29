@@ -3,12 +3,13 @@ from typing import Dict
 import colorsys
 import random
 
-def createRandomColor(shade: float):
-    h = random.random()
-    s = 1
-    v = 1
-
-    return colorsys.hsv_to_rgb(h,s,v)
+def createColorPair(value: float):
+    hue = random.random()
+    
+    return (
+        colorsys.hsv_to_rgb(hue, 1.0, 1.0),
+        colorsys.hsv_to_rgb(hue, 1.0, value)
+    )
 
 def clamp(min, x, max):
     return min if x < min else (max if x > max else x)

@@ -1,3 +1,4 @@
+from time import time
 from matplotlib import patches
 from model import DataModel
 
@@ -22,11 +23,11 @@ class ModelSubplot:
         self.plot.set_title(name)
 
         self.plot.xaxis.set_major_formatter(
-            tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(domain[1]-domain[0])))
+            tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(domain[0]-domain[1]) + domain[1]))
         )
 
         self.plot.yaxis.set_major_formatter(
-            tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(range[1]-range[0])))
+            tck.FuncFormatter(lambda x, pos: '{:.0f}'.format(x*(range[0]-range[1]) + range[1]))
         )
 
         self.plot.autoscale(False)
@@ -35,11 +36,14 @@ class ModelSubplot:
         ncols = utility.get_digit(layout, 2)
 
         aspect_radius = utility.get_aspect(ncols, nrows, radius)
+        
+        self.line, = self.plot.plot(
+            ModelSubplot.X1, self.model.apply(ModelSubplot.X1, ModelSubplot.X2), color=linecolor, zorder=0)
+
         for position in points:
             self.points.append(position)
             self.nodes.append(DraggablePoint(self, position, pointcolor, aspect_radius))
 
-        self.line, = self.plot.plot(ModelSubplot.X1, self.model.apply(ModelSubplot.X1, ModelSubplot.X2), color=linecolor)
 
     def update(self):
         self.points = [x.get_point() for x in self.nodes]
@@ -49,8 +53,17 @@ class ModelSubplot:
     def draw(self):
         self.plot.draw_artist(self.line)
 
+    def set_active(self, active):
+        self.parent.set_active(active)
+
     def set_animated(self, value):
         self.line.set_animated(value)
+
+    def get_points(self):
+        return self.points
+
+    def get_model(self):
+        return self.model
 
 # https://stackoverflow.com/questions/28001655/draggable-line-with-draggable-points
 class DraggablePoint:
@@ -68,10 +81,10 @@ class DraggablePoint:
         self.color = color
         self.x = position[0]
         self.y = position[1]
-        self.press = False
         self.background = None
+        self.offset = None
         self.radius = DraggablePoint.get_aspect(parent.plot, radius)
-        self.patch = patches.Ellipse(position, self.radius[0], self.radius[1], fc=color)
+        self.patch = patches.Ellipse(position, self.radius[0], self.radius[1], fc=color, zorder=1)
 
         parent.plot.add_patch(self.patch)
 
@@ -107,6 +120,7 @@ class DraggablePoint:
         DraggablePoint.lock = self
         self.patch.set_animated(True)
         self.parent.set_animated(True)
+        self.parent.set_active(True)
 
         canvas = self.patch.figure.canvas
         axes = self.patch.axes
@@ -116,14 +130,31 @@ class DraggablePoint:
         canvas.draw()
         self.background = canvas.copy_from_bbox(self.patch.axes.bbox)
 
-        # now redraw just the rectangle
-        axes.draw_artist(self.patch)
-        
         self.parent.draw()
 
+        axes.draw_artist(self.patch)
+        
         # and blit just the redrawn area
         canvas.blit(axes.bbox)
+    
+    def on_motion(self, event):
+        if DraggablePoint.lock is not self: return
+        if event.inaxes != self.patch.axes: return
 
+        canvas = self.patch.figure.canvas
+        axes = self.patch.axes
+
+        self.update_position(event)
+        self.parent.update()
+
+        canvas.restore_region(self.background)
+    
+        self.parent.draw()
+        
+        axes.draw_artist(self.patch)
+
+        canvas.blit(axes.bbox)
+  
     def on_release(self, event):
         if DraggablePoint.lock is not self: return
         # Release acquired lock
@@ -139,24 +170,7 @@ class DraggablePoint:
 
         # redraw the full figure
         self.patch.figure.canvas.draw()
-    
-    def on_motion(self, event):
-        if DraggablePoint.lock is not self: return
-        if event.inaxes != self.patch.axes: return
-
-        canvas = self.patch.figure.canvas
-        axes = self.patch.axes
-
-        self.update_position(event)
-        self.parent.update()
-
-        canvas.restore_region(self.background)
-        axes.draw_artist(self.patch)
-    
-        self.parent.draw()
-
-        canvas.blit(axes.bbox)
-        
+        self.parent.set_active(False)
 
     def on_resize(self, event):
         self.update_aspect(event, True)

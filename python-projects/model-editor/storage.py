@@ -1,88 +1,58 @@
 import os
 
-import numpy as np
+DEFAULT_POINTS = [(0.2, 0.5), (0.4, 0.5), (0.6, 0.5)]
 
-from typing import Optional
-from data import ModelParameters
-
-class StorageBase:
+class DataStorage:
     target: str
 
     def __init__(self, target: str) -> None:
         self.target = target
-
-    def update(self) -> bool:
-        raise NotImplementedError('subclasses must implement update()!')
-
-class ModelStorage(StorageBase):
-    _model: ModelParameters
-    _configuration: str
-
-    def __init__(self, target: str, configuration: str) -> None:
-        super().__init__(target)
-        self.configuration = configuration
-        self._last_change_t = 0
-        self._model = None
-
-    def model(self) -> Optional[ModelParameters]:
-        return self._model
-
-    def update(self) -> bool:
-        change_t = os.stat(self.target).st_mtime
-        if change_t != self._last_change_t:
-            self.__read();
-            self._last_change_t = change_t;
-            return True
-        return False
-
-    def __read(self):
-        f = open(self.target, "r")
-
-        line = f.readline()
-        if line:       
-            rawparams = line.split(',')
-            if 'nan' in rawparams:
-                self._model = None
-            else:
-                self._model = ModelParameters([float(x) for x in rawparams])
-        else:
-            self._model = None
-
-
-class DataStorage(StorageBase):
-    configuration: str
-    _points: np.array
-    _speed: np.array
-
-    def __init__(self, target: str, configuration: str) -> None:
-        super().__init__(target)
-        self.configuration = configuration
-        self._last_change_t = 0
-        self._points = None
-
-    def points(self) -> Optional[np.array]:
-        return self._points
-
-    def update(self) -> bool:
-        change_t = os.stat(self.target).st_mtime
-        if change_t != self._last_change_t:
-            self.__read();
-            self._last_change_t = change_t;
-            return True
-        return False
-
-    def __read(self):
-        f = open(self.target, "r")
+        
+    def read(self):
+        if not os.path.exists(self.target):
+            open(self.target, 'w').close()
+            return list(DEFAULT_POINTS)
 
         points = []
+    
+        f = open(self.target, "r")
 
         for line in f.readlines():
             v = line.split(',')
             points.append([ float(v[0]), float(v[1]) ])
+        
+        f.close()
 
-        self._points = np.array(points)
+        if len(points) != 3:
+            return list(DEFAULT_POINTS)
 
-class ConfigurationStorage:
-    def __init__(self, model: ModelStorage, data: DataStorage) -> None:
-        self.model = model
-        self.data = data
+        return points
+        
+    def write(self, points):
+        f = open(self.target, "w")
+
+        f.writelines(f"{pt[0]}, {pt[1]}\n" for pt in points)
+
+        f.close()
+
+class OptionsStorage:
+    target: str
+
+    def __init__(self, target: str) -> None:
+        self.target = target
+        
+    def read(self):
+        options = dict()
+
+        if not os.path.exists(self.target):
+            open(self.target, 'w').close()
+        else:
+            f = open(self.target, "r")
+
+            for line in f.readlines():
+                key, value = line.split('=')
+                options[key] = value
+
+            f.close()
+
+        return options
